@@ -982,24 +982,24 @@ function onKeyChange(event, pressed) {
     return;
   }
 
-  if (["ArrowLeft", "a", "A"].includes(event.key)) {
+  if (event.key === "ArrowLeft" || event.code === "KeyA") {
     input.left = pressed;
   }
 
-  if (["ArrowRight", "d", "D"].includes(event.key)) {
+  if (event.key === "ArrowRight" || event.code === "KeyD") {
     input.right = pressed;
   }
 
-  if (["ArrowUp", "w", "W", " "].includes(event.key)) {
+  if (event.key === "ArrowUp" || event.code === "KeyW" || event.code === "Space") {
     input.jump = pressed;
     event.preventDefault();
   }
 
-  if (pressed && ["z", "Z"].includes(event.key)) {
+  if (pressed && event.code === "KeyZ") {
     toggleSleep();
   }
 
-  if (pressed && ["m", "M"].includes(event.key)) {
+  if (pressed && event.code === "KeyM") {
     localPlayer.sleeping = false;
     markSleepPending();
     localPlayer.meowing = true;
