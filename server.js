@@ -9,11 +9,18 @@ const __dirname = path.dirname(__filename);
 const publicDir = path.join(__dirname, "public");
 const playerTimeoutMs = 15000;
 const meowDurationMs = 1800;
+const chatBubbleDurationMs = 5200;
 
 const worldConfig = {
-  width: 3200,
-  height: 680,
+  width: 4700,
+  height: 720,
   spawn: { x: 160, y: 470 },
+  hazards: {
+    lava: {
+      startX: 3280,
+      surfaceY: 610
+    }
+  },
   zones: [
     {
       id: "room",
@@ -33,15 +40,22 @@ const worldConfig = {
       id: "garden",
       name: "Whisker Garden",
       x: 1760,
-      width: 1440,
+      width: 1520,
       palette: { sky: "#d6f2ff", ground: "#5ea96f" }
+    },
+    {
+      id: "lava",
+      name: "Ashen Lava Leap",
+      x: 3280,
+      width: 1420,
+      palette: { sky: "#37263d", ground: "#ff6b35" }
     }
   ]
 };
 
 const platformLayout = [
-  { x: 0, y: 560, width: 1640, height: 120, theme: "room" },
-  { x: 1640, y: 560, width: 1560, height: 120, theme: "garden" },
+  { x: 0, y: 560, width: 1640, height: 160, theme: "room" },
+  { x: 1640, y: 560, width: 1640, height: 160, theme: "garden" },
   { x: 110, y: 470, width: 220, height: 20, theme: "room" },
   { x: 390, y: 410, width: 180, height: 20, theme: "room" },
   { x: 640, y: 340, width: 170, height: 20, theme: "room" },
@@ -52,7 +66,13 @@ const platformLayout = [
   { x: 2120, y: 390, width: 160, height: 20, theme: "garden" },
   { x: 2390, y: 320, width: 170, height: 20, theme: "garden" },
   { x: 2660, y: 430, width: 180, height: 20, theme: "garden" },
-  { x: 2920, y: 350, width: 140, height: 20, theme: "garden" }
+  { x: 2920, y: 350, width: 140, height: 20, theme: "garden" },
+  { x: 3380, y: 560, width: 170, height: 20, theme: "lava-rock" },
+  { x: 3620, y: 485, width: 140, height: 20, theme: "lava-rock" },
+  { x: 3850, y: 405, width: 150, height: 20, theme: "lava-rock" },
+  { x: 4090, y: 525, width: 120, height: 20, theme: "lava-rock" },
+  { x: 4300, y: 440, width: 150, height: 20, theme: "lava-rock" },
+  { x: 4520, y: 350, width: 140, height: 20, theme: "lava-rock" }
 ];
 
 const collectibleSpawns = [
@@ -61,7 +81,8 @@ const collectibleSpawns = [
   { id: "fish-door", kind: "fish", label: "Golden Tuna", x: 1555, y: 455, respawnMs: 8000 },
   { id: "gift-bush", kind: "gift", label: "Garden Gift", x: 2165, y: 345, respawnMs: 12000 },
   { id: "fish-pond", kind: "fish", label: "Pond Fish", x: 2435, y: 275, respawnMs: 8000 },
-  { id: "gift-tree", kind: "gift", label: "Tree Present", x: 2950, y: 305, respawnMs: 12000 }
+  { id: "gift-tree", kind: "gift", label: "Tree Present", x: 2950, y: 305, respawnMs: 12000 },
+  { id: "gift-lava", kind: "gift", label: "Magma Gift", x: 4325, y: 395, respawnMs: 12000 }
 ];
 
 function createCollectibles() {
@@ -127,9 +148,13 @@ function makePlayer(index) {
     vx: 0,
     vy: 0,
     facing: 1,
+    sleeping: false,
     meowUntil: 0,
+    bubbleText: "",
+    bubbleUntil: 0,
     treatsEaten: 0,
     giftsCollected: 0,
+    deaths: 0,
     score: 0,
     joinedAt: Date.now(),
     updatedAt: Date.now(),
@@ -185,9 +210,12 @@ function serializePlayers(players) {
     vx: player.vx,
     vy: player.vy,
     facing: player.facing,
+    sleeping: player.sleeping,
     meowing: player.meowUntil > now,
+    bubbleText: player.bubbleUntil > now ? player.bubbleText : "",
     treatsEaten: player.treatsEaten,
     giftsCollected: player.giftsCollected,
+    deaths: player.deaths,
     score: player.score,
     areaName: findZoneName(player.x),
     style: player.style
@@ -268,6 +296,10 @@ function addChatMessage(world, player, text) {
   if (!sanitized) {
     return false;
   }
+
+  player.bubbleText = sanitized;
+  player.bubbleUntil = Date.now() + chatBubbleDurationMs;
+  player.sleeping = false;
 
   world.chatMessages.push({
     id: randomUUID(),
@@ -355,10 +387,22 @@ function createAppServer() {
         player.vy = sanitizeNumber(body.vy, 0, -30, 30);
         player.facing = body.facing === -1 ? -1 : 1;
         player.name = sanitizeText(body.name, player.name, 18);
+        player.sleeping = body.sleeping === true;
         player.updatedAt = Date.now();
+
+        if (body.died === true) {
+          player.deaths += 1;
+          player.score = Math.max(0, player.score - 3);
+          player.sleeping = false;
+          player.bubbleText = "Ouch!";
+          player.bubbleUntil = Date.now() + 1800;
+        }
 
         if (body.meow === true) {
           player.meowUntil = Date.now() + meowDurationMs;
+          player.bubbleText = "MEW!";
+          player.bubbleUntil = Date.now() + meowDurationMs;
+          player.sleeping = false;
         }
 
         const collectedSomething = applyCollectedItems(world, player, body.collectIds);
@@ -393,7 +437,8 @@ function createAppServer() {
         json(response, 200, {
           ok: sent,
           tick: world.tick,
-          chatMessages: world.chatMessages
+          chatMessages: world.chatMessages,
+          player: serializePlayers(new Map([[player.id, player]])).at(0)
         });
         return;
       }

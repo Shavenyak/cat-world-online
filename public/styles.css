@@ -83,6 +83,18 @@ h1 {
   color: var(--text-soft);
 }
 
+.music-toggle {
+  justify-self: start;
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #7ac9a7, #f0cf65);
+  color: #18211c;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .name-form,
 .chat-card {
   padding: 16px;
