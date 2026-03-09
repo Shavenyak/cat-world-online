@@ -1,0 +1,259 @@
+:root {
+  --sky-top: #f7e8d0;
+  --sky-bottom: #ffd6bf;
+  --panel: rgba(39, 42, 72, 0.88);
+  --panel-border: rgba(255, 255, 255, 0.16);
+  --panel-soft: rgba(255, 247, 238, 0.18);
+  --text-main: #fff7f0;
+  --text-soft: rgba(255, 247, 240, 0.75);
+  --accent: #ff8552;
+  --accent-2: #7ac9a7;
+  --shadow: rgba(53, 27, 12, 0.24);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at top, rgba(255, 255, 255, 0.28), transparent 32%),
+    linear-gradient(180deg, var(--sky-top), var(--sky-bottom));
+}
+
+body {
+  overflow: hidden;
+}
+
+.shell {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 20px;
+  padding: 20px;
+}
+
+.hud-card,
+.game-panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: 0 20px 60px var(--shadow);
+  backdrop-filter: blur(12px);
+}
+
+.hud-card {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  font-size: 0.72rem;
+  color: var(--accent-2);
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 4vw, 4rem);
+  line-height: 0.95;
+}
+
+.intro {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text-soft);
+}
+
+.controls {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border-radius: 18px;
+  background: var(--panel-soft);
+  color: var(--text-soft);
+}
+
+.name-form,
+.chat-card {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.field-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-2);
+  margin-bottom: 8px;
+}
+
+.input-row,
+.chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+
+.input-row input,
+.chat-form input {
+  width: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 14px;
+  padding: 11px 14px;
+  background: rgba(15, 19, 33, 0.55);
+  color: var(--text-main);
+  font: inherit;
+}
+
+.input-row input::placeholder,
+.chat-form input::placeholder {
+  color: rgba(255, 247, 240, 0.45);
+}
+
+.input-row button,
+.chat-form button {
+  border: 0;
+  border-radius: 14px;
+  padding: 0 16px;
+  background: linear-gradient(135deg, #ffb85c, #ff8552);
+  color: #24150f;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.chat-hint {
+  color: var(--text-soft);
+  font-size: 0.82rem;
+}
+
+.chat-log {
+  margin-top: 12px;
+  display: grid;
+  gap: 8px;
+  max-height: 188px;
+  min-height: 140px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.chat-message,
+.chat-empty {
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(15, 19, 33, 0.45);
+}
+
+.chat-message strong {
+  color: #ffd98a;
+}
+
+.chat-empty {
+  color: var(--text-soft);
+}
+
+.chat-form {
+  margin-top: 12px;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.stat-chip {
+  padding: 14px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+
+.stat-chip strong {
+  font-size: 1rem;
+}
+
+.status-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.pill,
+.count {
+  display: inline-flex;
+  align-items: center;
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.pill {
+  color: #112114;
+  background: linear-gradient(135deg, #f0cf65, #7ac9a7);
+  font-weight: 700;
+}
+
+.game-panel {
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  position: relative;
+  overflow: hidden;
+}
+
+#game {
+  width: 100%;
+  max-width: 1400px;
+  aspect-ratio: 1400 / 680;
+  border-radius: 20px;
+  background: linear-gradient(180deg, rgba(255, 243, 222, 0.95), rgba(255, 230, 197, 0.95));
+}
+
+@media (max-width: 1080px) {
+  body {
+    overflow: auto;
+  }
+
+  .shell {
+    grid-template-columns: 1fr;
+  }
+
+  .hud-card {
+    order: 2;
+  }
+
+  .chat-log {
+    max-height: 140px;
+  }
+}
